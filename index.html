@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Streaming App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: white;
+        }
+        
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            background-color: #1a1a1a;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e50914;
+        }
+        
+        .visitor-counter {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .search-container {
+            flex-grow: 1;
+            max-width: 400px;
+            margin: 0 15px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            background-color: #333;
+            color: white;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #1a1a1a;
+            padding: 5px 0;
+            flex-wrap: wrap;
+        }
+        
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            margin: 0 2px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        nav button:hover, nav button.active {
+            color: #e50914;
+        }
+        
+        .ad-container {
+            width: 100%;
+            height: 150px;
+            background-color: #333;
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .ad-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .ad-timer {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .content {
+            display: none;
+            padding: 15px;
+        }
+        
+        .content.active {
+            display: block;
+        }
+        
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .movie-card {
+            background-color: #1a1a1a;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .movie-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .movie-thumbnail {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            position: relative;
+        }
+        
+        .movie-thumbnail img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .movie-info {
+            padding: 10px;
+        }
+        
+        .movie-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .pagination button.active {
+            background-color: #e50914;
+        }
+        
+        .pagination button:hover:not(.active) {
+            background-color: #555;
+        }
+        
+        .player-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .player-wrapper {
+            width: 90%;
+            max-width: 1000px;
+            position: relative;
+        }
+        
+        .close-player {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .admin-panel {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .admin-form input, .admin-form select, .admin-form button {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .admin-form button {
+            background-color: #e50914;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .code-input {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .code-input input {
+            flex-grow: 1;
+        }
+        
+        .admin-actions {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .admin-actions.active {
+            display: block;
+        }
+        
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .contact-form input, .contact-form textarea, .contact-form button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: white;
+        }
+        
+        .contact-form button {
+            background-color: #e50914;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .form-message {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .form-message.success {
+            background-color: #4CAF50;
+            display: block;
+        }
+        
+        .form-message.error {
+            background-color: #f44336;
+            display: block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .ad-image-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div class="top-bar">
+            <div class="logo">MystrimYt</div>
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="Search movies...">
+            </div>
+            <div class="visitor-counter">Pengunjung: <span id="visitor-count">0</span></div>
+        </div>
+        
+        <nav id="main-nav">
+            <button data-target="drama" class="active">Drama</button>
+            <button data-target="telefilem">Telefilem</button>
+            <button data-target="trailer">Trailer</button>
+            <button data-target="filem">Filem</button>
+            <button data-target="admin">Admin</button>
+            <button data-target="hubungi">Hubungi</button>
+        </nav>
+    </div>
+    
+    <div id="drama" class="content active">
+        <div class="ad-container" id="drama-ad">
+            <!-- Ad will be inserted here -->
+        </div>
+        <div class="movies-grid" id="drama-movies">
+            <!-- Drama movies will be inserted here -->
+        </div>
+        <div class="pagination" id="drama-pagination"></div>
+    </div>
+    
+    <div id="telefilem" class="content">
+        <div class="ad-container" id="telefilem-ad">
+            <!-- Ad will be inserted here -->
+        </div>
+        <div class="movies-grid" id="telefilem-movies">
+            <!-- Telefilem movies will be inserted here -->
+        </div>
+        <div class="pagination" id="telefilem-pagination"></div>
+    </div>
+    
+    <div id="trailer" class="content">
+        <div class="ad-container" id="trailer-ad">
+            <!-- Ad will be inserted here -->
+        </div>
+        <div class="movies-grid" id="trailer-movies">
+            <!-- Trailer movies will be inserted here -->
+        </div>
+        <div class="pagination" id="trailer-pagination"></div>
+    </div>
+    
+    <div id="filem" class="content">
+        <div class="ad-container" id="filem-ad">
+            <!-- Ad will be inserted here -->
+        </div>
+        <div class="movies-grid" id="filem-movies">
+            <!-- Filem movies will be inserted here -->
+        </div>
+        <div class="pagination" id="filem-pagination"></div>
+    </div>
+    
+    <div id="admin" class="content">
+        <div class="admin-panel">
+            <h2>Admin Panel</h2>
+            <div class="code-input">
+                <input type="password" id="admin-code" placeholder="Enter access code">
+                <button id="submit-code">Submit</button>
+            </div>
+            
+            <div class="admin-actions">
+                <div class="admin-form">
+                    <h3>Add Movie</h3>
+                    <input type="text" id="youtube-url" placeholder="YouTube URL">
+                    <select id="movie-type">
+                        <option value="drama">Drama</option>
+                        <option value="telefilem">Telefilem</option>
+                        <option value="trailer">Trailer</option>
+                        <option value="filem">Filem</option>
+                    </select>
+                    <button id="add-movie">
+                        <span id="add-movie-text">Add Movie</span>
+                        <span id="add-movie-loader" class="loading" style="display: none;"></span>
+                    </button>
+                </div>
+                
+                <div class="admin-form">
+                    <h3>Remove Movie</h3>
+                    <select id="remove-movie-type">
+                        <option value="drama">Drama</option>
+                        <option value="telefilem">Telefilem</option>
+                        <option value="trailer">Trailer</option>
+                        <option value="filem">Filem</option>
+                    </select>
+                    <select id="movie-to-remove">
+                        <!-- Movies will be populated here -->
+                    </select>
+                    <button id="remove-movie">Remove Movie</button>
+                </div>
+                
+                <div class="admin-form">
+                    <h3>Hide Menu</h3>
+                    <div id="menu-toggle-container">
+                        <label><input type="checkbox" name="menu-toggle" value="drama" checked> Drama</label>
+                        <label><input type="checkbox" name="menu-toggle" value="telefilem" checked> Telefilem</label>
+                        <label><input type="checkbox" name="menu-toggle" value="trailer" checked> Trailer</label>
+                        <label><input type="checkbox" name="menu-toggle" value="filem" checked> Filem</label>
+                        <label><input type="checkbox" name="menu-toggle" value="admin" checked> Admin</label>
+                        <label><input type="checkbox" name="menu-toggle" value="hubungi" checked> Hubungi</label>
+                    </div>
+                    <button id="update-menu">Update Menu</button>
+                </div>
+                
+                <div class="admin-form">
+                    <h3>Add Advertisement</h3>
+                    <div class="ad-image-container">
+                        <input type="text" id="ad-image-url1" placeholder="Image URL 1">
+                        <input type="text" id="ad-image-url2" placeholder="Image URL 2">
+                    </div>
+                    <select id="ad-duration">
+                        <option value="9">9 hours</option>
+                        <option value="18">18 hours</option>
+                    </select>
+                    <select id="ad-start-time">
+                        <option value="6">6:00 AM</option>
+                        <option value="15">3:00 PM</option>
+                    </select>
+                    <select id="ad-frequency">
+                        <option value="1">1 day</option>
+                        <option value="3">3 days</option>
+                        <option value="5">5 days</option>
+                        <option value="10">10 days</option>
+                        <option value="15">15 days</option>
+                        <option value="20">20 days</option>
+                        <option value="30">30 days</option>
+                    </select>
+                    <button id="add-ad">Add Advertisement</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="hubungi" class="content">
+        <form id="contact-form" class="contact-form" action="https://formsubmit.co/laruslan.ismail5@gmail.com" method="POST">
+            <h2>Hubungi Kami</h2>
+            <input type="text" name="name" placeholder="Nama" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="subject" placeholder="Subjek" required>
+            <textarea name="message" placeholder="Mesej" rows="5" required></textarea>
+            <input type="hidden" name="_next" value="?success=true">
+            <input type="hidden" name="_captcha" value="false">
+            <button type="submit">Hantar</button>
+            <div id="form-message" class="form-message"></div>
+        </form>
+    </div>
+    
+    <div class="player-container" id="player-container">
+        <div class="player-wrapper">
+            <button class="close-player" id="close-player">&times;</button>
+            <iframe id="youtube-player" width="100%" height="500" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+    
+    <script>
+        // App data
+        const movies = {
+            drama: [],
+            telefilem: [],
+            trailer: [],
+            filem: []
+        };
+        
+        const ads = {
+            currentAd: null,
+            nextAd: null
+        };
+        
+        const ACCESS_CODE = "z123";
+        const VIDEOS_PER_PAGE = 30;
+        
+        // Current page for each category
+        const currentPages = {
+            drama: 1,
+            telefilem: 1,
+            trailer: 1,
+            filem: 1
+        };
+        
+        // DOM elements
+        const navButtons = document.querySelectorAll('nav button');
+        const contents = document.querySelectorAll('.content');
+        const movieGrids = {
+            drama: document.getElementById('drama-movies'),
+            telefilem: document.getElementById('telefilem-movies'),
+            trailer: document.getElementById('trailer-movies'),
+            filem: document.getElementById('filem-movies')
+        };
+        
+        const paginationContainers = {
+            drama: document.getElementById('drama-pagination'),
+            telefilem: document.getElementById('telefilem-pagination'),
+            trailer: document.getElementById('trailer-pagination'),
+            filem: document.getElementById('filem-pagination')
+        };
+        
+        const adContainers = {
+            drama: document.getElementById('drama-ad'),
+            telefilem: document.getElementById('telefilem-ad'),
+            trailer: document.getElementById('trailer-ad'),
+            filem: document.getElementById('filem-ad')
+        };
+        
+        // Search elements
+        const searchBox = document.querySelector('.search-box');
+        
+        // Player elements
+        const playerContainer = document.getElementById('player-container');
+        const youtubePlayer = document.getElementById('youtube-player');
+        const closePlayer = document.getElementById('close-player');
+        
+        // Admin elements
+        const adminCodeInput = document.getElementById('admin-code');
+        const submitCodeBtn = document.getElementById('submit-code');
+        const adminActions = document.querySelector('.admin-actions');
+        const youtubeUrlInput = document.getElementById('youtube-url');
+        const movieTypeSelect = document.getElementById('movie-type');
+        const addMovieBtn = document.getElementById('add-movie');
+        const addMovieText = document.getElementById('add-movie-text');
+        const addMovieLoader = document.getElementById('add-movie-loader');
+        const removeMovieTypeSelect = document.getElementById('remove-movie-type');
+        const movieToRemoveSelect = document.getElementById('movie-to-remove');
+        const removeMovieBtn = document.getElementById('remove-movie');
+        const menuToggleContainer = document.getElementById('menu-toggle-container');
+        const updateMenuBtn = document.getElementById('update-menu');
+        const adImageUrlInput1 = document.getElementById('ad-image-url1');
+        const adImageUrlInput2 = document.getElementById('ad-image-url2');
+        const adDurationSelect = document.getElementById('ad-duration');
+        const adStartTimeSelect = document.getElementById('ad-start-time');
+        const adFrequencySelect = document.getElementById('ad-frequency');
+        const addAdBtn = document.getElementById('add-ad');
+        
+        // Contact form elements
+        const contactForm = document.getElementById('contact-form');
+        const formMessage = document.getElementById('form-message');
+        
+        // Visitor counter
+        const visitorCountElement = document.getElementById('visitor-count');
+        
+        // Initialize the app
+        function init() {
+            // Load data from localStorage
+            loadData();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Render all content
+            renderAll();
+            
+            // Check and update ads
+            updateAds();
+            
+            // Initialize visitor counter
+            initVisitorCounter();
+            
+            // Check for contact form success
+            checkContactFormSuccess();
+        }
+        
+        // Initialize visitor counter
+        function initVisitorCounter() {
+            let count = localStorage.getItem('visitorCount');
+            
+            if (!count) {
+                count = 0;
+            } else {
+                count = parseInt(count);
+            }
+            
+            // Increment count for this visit
+            count++;
+            localStorage.setItem('visitorCount', count);
+            
+            // Update display
+            visitorCountElement.textContent = count;
+        }
+        
+        // Check for contact form success
+        function checkContactFormSuccess() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                showFormMessage('Mesej anda telah berjaya dihantar!', 'success');
+                // Remove the success parameter from URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        // Show form message
+        function showFormMessage(message, type) {
+            formMessage.textContent = message;
+            formMessage.className = `form-message ${type}`;
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                formMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Load data from localStorage
+        function loadData() {
+            const savedMovies = localStorage.getItem('movies');
+            if (savedMovies) {
+                Object.assign(movies, JSON.parse(savedMovies));
+            }
+            
+            const savedAds = localStorage.getItem('ads');
+            if (savedAds) {
+                Object.assign(ads, JSON.parse(savedAds));
+                
+                // If there's a current ad, check if it's expired
+                if (ads.currentAd) {
+                    if (ads.currentAd.expirationTime <= Date.now()) {
+                        if (ads.currentAd.frequency > 1 && ads.currentAd.cyclesRemaining > 0) {
+                            scheduleNextAdCycle(ads.currentAd);
+                        } else {
+                            ads.currentAd = null;
+                        }
+                    }
+                }
+            }
+            
+            const hiddenMenus = localStorage.getItem('hiddenMenus');
+            if (hiddenMenus) {
+                const menus = JSON.parse(hiddenMenus);
+                menus.forEach(menu => {
+                    const btn = document.querySelector(`nav button[data-target="${menu}"]`);
+                    if (btn) btn.classList.add('hidden');
+                    
+                    const checkbox = document.querySelector(`input[name="menu-toggle"][value="${menu}"]`);
+                    if (checkbox) checkbox.checked = false;
+                });
+            }
+            
+            const savedPages = localStorage.getItem('currentPages');
+            if (savedPages) {
+                Object.assign(currentPages, JSON.parse(savedPages));
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('movies', JSON.stringify(movies));
+            localStorage.setItem('ads', JSON.stringify(ads));
+            localStorage.setItem('currentPages', JSON.stringify(currentPages));
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Navigation buttons
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = button.getAttribute('data-target');
+                    
+                    // Remove active class from all buttons and contents
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    contents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button and target content
+                    button.classList.add('active');
+                    document.getElementById(target).classList.add('active');
+                    
+                    // Render the current page for this category
+                    renderMovies(target);
+                    renderPagination(target);
+                });
+            });
+            
+            // Search functionality
+            searchBox.addEventListener('input', () => {
+                const searchTerm = searchBox.value.toLowerCase();
+                if (searchTerm.length > 0) {
+                    searchMovies(searchTerm);
+                } else {
+                    // If search box is empty, show all movies in current category
+                    const activeContent = document.querySelector('.content.active');
+                    if (activeContent) {
+                        const activeCategory = activeContent.id;
+                        renderMovies(activeCategory);
+                        renderPagination(activeCategory);
+                    }
+                }
+            });
+            
+            // Close player
+            closePlayer.addEventListener('click', () => {
+                playerContainer.style.display = 'none';
+                youtubePlayer.src = '';
+            });
+            
+            // Admin code submission
+            submitCodeBtn.addEventListener('click', () => {
+                if (adminCodeInput.value === ACCESS_CODE) {
+                    adminActions.classList.add('active');
+                } else {
+                    alert('Invalid access code');
+                }
+            });
+            
+            // Add movie
+            addMovieBtn.addEventListener('click', async () => {
+                const url = youtubeUrlInput.value.trim();
+                const type = movieTypeSelect.value;
+                
+                if (!url) {
+                    alert('Please enter a YouTube URL');
+                    return;
+                }
+                
+                try {
+                    // Show loading state
+                    addMovieText.style.display = 'none';
+                    addMovieLoader.style.display = 'inline-block';
+                    addMovieBtn.disabled = true;
+                    
+                    const videoId = extractYouTubeId(url);
+                    if (!videoId) {
+                        alert('Invalid YouTube URL');
+                        return;
+                    }
+                    
+                    // Get video title using YouTube oEmbed
+                    const title = await getYouTubeVideoTitle(videoId);
+                    
+                    // Add movie to collection
+                    movies[type].push({
+                        id: videoId,
+                        title: title,
+                        url: url
+                    });
+                    
+                    // Save and render
+                    saveData();
+                    renderMovies(type);
+                    renderPagination(type);
+                    populateRemoveMovieDropdown(type);
+                    
+                    // Clear input
+                    youtubeUrlInput.value = '';
+                    
+                    alert('Movie added successfully!');
+                } catch (error) {
+                    console.error('Error adding movie:', error);
+                    alert('Failed to add movie. Please try again.');
+                } finally {
+                    // Reset button state
+                    addMovieText.style.display = 'inline-block';
+                    addMovieLoader.style.display = 'none';
+                    addMovieBtn.disabled = false;
+                }
+            });
+            
+            // Remove movie type change
+            removeMovieTypeSelect.addEventListener('change', () => {
+                const type = removeMovieTypeSelect.value;
+                populateRemoveMovieDropdown(type);
+            });
+            
+            // Remove movie
+            removeMovieBtn.addEventListener('click', () => {
+                const type = removeMovieTypeSelect.value;
+                const selectedIndex = movieToRemoveSelect.selectedIndex;
+                
+                if (selectedIndex === -1) return;
+                
+                // Remove movie from collection
+                movies[type].splice(selectedIndex, 1);
+                
+                // Save and render
+                saveData();
+                renderMovies(type);
+                renderPagination(type);
+                populateRemoveMovieDropdown(type);
+                
+                alert('Movie removed successfully!');
+            });
+            
+            // Update menu
+            updateMenuBtn.addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('input[name="menu-toggle"]:checked');
+                const hiddenMenus = [];
+                
+                // Get all menu items
+                const allMenus = Array.from(document.querySelectorAll('input[name="menu-toggle"]'));
+                
+                allMenus.forEach(checkbox => {
+                    const menu = checkbox.value;
+                    const btn = document.querySelector(`nav button[data-target="${menu}"]`);
+                    
+                    if (checkbox.checked) {
+                        btn.classList.remove('hidden');
+                    } else {
+                        btn.classList.add('hidden');
+                        hiddenMenus.push(menu);
+                    }
+                });
+                
+                // Save hidden menus to localStorage
+                localStorage.setItem('hiddenMenus', JSON.stringify(hiddenMenus));
+                
+                alert('Menu updated successfully!');
+            });
+            
+            // Add advertisement
+            addAdBtn.addEventListener('click', () => {
+                const imageUrl1 = adImageUrlInput1.value.trim();
+                const imageUrl2 = adImageUrlInput2.value.trim();
+                const duration = parseInt(adDurationSelect.value);
+                const startTime = parseInt(adStartTimeSelect.value);
+                const frequency = parseInt(adFrequencySelect.value);
+                
+                if (!imageUrl1 && !imageUrl2) {
+                    alert('Please enter at least one image URL');
+                    return;
+                }
+                
+                // Calculate start time (today at selected hour)
+                const now = new Date();
+                let startDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                    startTime,
+                    0,
+                    0
+                );
+                
+                // If the selected time has already passed today, schedule for tomorrow
+                if (startDate < now) {
+                    startDate.setDate(startDate.getDate() + 1);
+                }
+                
+                const startTimeMs = startDate.getTime();
+                const durationMs = duration * 60 * 60 * 1000;
+                const expirationTime = startTimeMs + durationMs;
+                
+                // Create ad object
+                const ad = {
+                    imageUrls: [imageUrl1, imageUrl2].filter(url => url),
+                    duration: duration,
+                    startTime: startTimeMs,
+                    expirationTime: expirationTime,
+                    frequency: frequency,
+                    cyclesRemaining: frequency > 1 ? frequency - 1 : 0
+                };
+                
+                // Set the ad
+                ads.currentAd = ad;
+                
+                // Save and render
+                saveData();
+                renderAds();
+                
+                // Clear inputs
+                adImageUrlInput1.value = '';
+                adImageUrlInput2.value = '';
+                
+                alert('Advertisement scheduled successfully!');
+            });
+            
+            // Contact form submission
+            contactForm.addEventListener('submit', (e) => {
+                // The form will be submitted to FormSubmit.co
+                // We'll handle the success message via the URL parameter
+            });
+        }
+        
+        // Schedule the next ad cycle
+        function scheduleNextAdCycle(ad) {
+            const nextStartTime = ad.expirationTime + (24 * 60 * 60 * 1000); // Next day
+            const durationMs = ad.duration * 60 * 60 * 1000;
+            const nextExpirationTime = nextStartTime + durationMs;
+            
+            ads.nextAd = {
+                ...ad,
+                startTime: nextStartTime,
+                expirationTime: nextExpirationTime,
+                cyclesRemaining: ad.cyclesRemaining - 1
+            };
+            
+            // Set a timeout to activate the next ad
+            setTimeout(() => {
+                ads.currentAd = ads.nextAd;
+                ads.nextAd = null;
+                saveData();
+                renderAds();
+                
+                // If there are more cycles remaining, schedule the next one
+                if (ads.currentAd.cyclesRemaining > 0) {
+                    scheduleNextAdCycle(ads.currentAd);
+                }
+            }, nextStartTime - Date.now());
+        }
+        
+        // Search movies across all categories
+        function searchMovies(searchTerm) {
+            const activeContent = document.querySelector('.content.active');
+            if (!activeContent) return;
+            
+            const activeCategory = activeContent.id;
+            const filteredMovies = movies[activeCategory].filter(movie => 
+                movie.title.toLowerCase().includes(searchTerm)
+            );
+            
+            const grid = movieGrids[activeCategory];
+            grid.innerHTML = '';
+            
+            // Hide pagination when searching
+            paginationContainers[activeCategory].innerHTML = '';
+            
+            filteredMovies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.innerHTML = `
+                    <div class="movie-thumbnail">
+                        <img src="https://img.youtube.com/vi/${movie.id}/mqdefault.jpg" alt="${movie.title}">
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.title}</h3>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    playMovie(movie.id);
+                });
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        // Extract YouTube video ID from URL
+        function extractYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+        
+        // Get YouTube video title using oEmbed
+        async function getYouTubeVideoTitle(videoId) {
+            try {
+                const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch video information');
+                }
+                
+                const data = await response.json();
+                return data.title;
+            } catch (error) {
+                console.error('Error fetching video title:', error);
+                // Fallback to a default title if the fetch fails
+                return `YouTube Video (${videoId})`;
+            }
+        }
+        
+        // Render all content
+        function renderAll() {
+            // Render movies for all categories
+            Object.keys(movies).forEach(type => {
+                renderMovies(type);
+                renderPagination(type);
+                populateRemoveMovieDropdown(type);
+            });
+            
+            // Render ads
+            renderAds();
+        }
+        
+        // Render movies for a specific category with pagination
+        function renderMovies(type) {
+            const grid = movieGrids[type];
+            grid.innerHTML = '';
+            
+            const startIndex = (currentPages[type] - 1) * VIDEOS_PER_PAGE;
+            const endIndex = startIndex + VIDEOS_PER_PAGE;
+            const moviesToShow = movies[type].slice(startIndex, endIndex);
+            
+            moviesToShow.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.innerHTML = `
+                    <div class="movie-thumbnail">
+                        <img src="https://img.youtube.com/vi/${movie.id}/mqdefault.jpg" alt="${movie.title}">
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.title}</h3>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    playMovie(movie.id);
+                });
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        // Render pagination controls
+        function renderPagination(type) {
+            const totalMovies = movies[type].length;
+            const totalPages = Math.ceil(totalMovies / VIDEOS_PER_PAGE);
+            const paginationContainer = paginationContainers[type];
+            
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&laquo;';
+            prevButton.disabled = currentPages[type] === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPages[type] > 1) {
+                    currentPages[type]--;
+                    saveData();
+                    renderMovies(type);
+                    renderPagination(type);
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+            
+            // Page buttons
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPages[type] - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                if (i === currentPages[type]) {
+                    pageButton.classList.add('active');
+                }
+                pageButton.addEventListener('click', () => {
+                    currentPages[type] = i;
+                    saveData();
+                    renderMovies(type);
+                    renderPagination(type);
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '&raquo;';
+            nextButton.disabled = currentPages[type] === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPages[type] < totalPages) {
+                    currentPages[type]++;
+                    saveData();
+                    renderMovies(type);
+                    renderPagination(type);
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+        
+        // Populate remove movie dropdown
+        function populateRemoveMovieDropdown(type) {
+            movieToRemoveSelect.innerHTML = '';
+            
+            movies[type].forEach(movie => {
+                const option = document.createElement('option');
+                option.value = movie.id;
+                option.textContent = movie.title;
+                movieToRemoveSelect.appendChild(option);
+            });
+        }
+        
+        // Play movie
+        function playMovie(videoId) {
+            youtubePlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            playerContainer.style.display = 'flex';
+        }
+        
+        // Render ads
+        function renderAds() {
+            const now = Date.now();
+            let activeAd = null;
+            
+            // Check if current ad is active
+            if (ads.currentAd && now >= ads.currentAd.startTime && now < ads.currentAd.expirationTime) {
+                activeAd = ads.currentAd;
+            }
+            
+            // If no active ad, show placeholder
+            Object.keys(adContainers).forEach(type => {
+                const adContainer = adContainers[type];
+                
+                if (activeAd) {
+                    // Rotate between available images
+                    const imageIndex = Math.floor(now / 60000) % activeAd.imageUrls.length; // Change every minute
+                    const imageUrl = activeAd.imageUrls[imageIndex];
+                    
+                    adContainer.innerHTML = `
+                        <img src="${imageUrl}" alt="Advertisement">
+                        <div class="ad-timer" id="${type}-timer"></div>
+                    `;
+                } else {
+                    adContainer.innerHTML = '<p>No active advertisement</p>';
+                }
+            });
+            
+            // Update timers
+            updateAdTimers();
+        }
+        
+        // Update ad timers
+        function updateAdTimers() {
+            const now = Date.now();
+            
+            if (ads.currentAd && now >= ads.currentAd.startTime && now < ads.currentAd.expirationTime) {
+                Object.keys(adContainers).forEach(type => {
+                    const timerElement = document.getElementById(`${type}-timer`);
+                    if (timerElement) {
+                        updateTimer(timerElement, ads.currentAd.expirationTime, type);
+                    }
+                });
+            }
+        }
+        
+        // Update timer display
+        function updateTimer(element, expirationTime, type) {
+            const now = Date.now();
+            const remaining = expirationTime - now;
+            
+            if (remaining <= 0) {
+                // Ad expired
+                if (ads.currentAd.frequency > 1 && ads.currentAd.cyclesRemaining > 0) {
+                    scheduleNextAdCycle(ads.currentAd);
+                } else {
+                    ads.currentAd = null;
+                }
+                saveData();
+                renderAds();
+                return;
+            }
+            
+            // Convert remaining time to days, hours, minutes, seconds
+            const seconds = Math.floor(remaining / 1000) % 60;
+            const minutes = Math.floor(remaining / (1000 * 60)) % 60;
+            const hours = Math.floor(remaining / (1000 * 60 * 60)) % 24;
+            const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+            
+            let timerText = '';
+            if (days > 0) timerText += `${days}d `;
+            if (hours > 0 || days > 0) timerText += `${hours}h `;
+            if (minutes > 0 || hours > 0 || days > 0) timerText += `${minutes}m `;
+            timerText += `${seconds}s`;
+            
+            element.textContent = timerText;
+            
+            // Update every second
+            setTimeout(() => updateTimer(element, expirationTime, type), 1000);
+        }
+        
+        // Check and update ads
+        function updateAds() {
+            const now = Date.now();
+            let needsUpdate = false;
+            
+            // Check current ad
+            if (ads.currentAd) {
+                if (now >= ads.currentAd.expirationTime) {
+                    if (ads.currentAd.frequency > 1 && ads.currentAd.cyclesRemaining > 0) {
+                        scheduleNextAdCycle(ads.currentAd);
+                    } else {
+                        ads.currentAd = null;
+                    }
+                    needsUpdate = true;
+                } else if (now >= ads.currentAd.startTime) {
+                    needsUpdate = true;
+                }
+            }
+            
+            if (needsUpdate) {
+                saveData();
+                renderAds();
+            }
+        }
+        
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
